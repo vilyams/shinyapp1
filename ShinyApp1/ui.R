@@ -1,33 +1,38 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-
+# Load packages ----
 library(shiny)
+library(quantmod)
 
-# Define UI for application that draws a histogram
 shinyUI(fluidPage(
-  
-  # Application title
-  titlePanel("Old Faithful Geyser Data"),
-  
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-       sliderInput("bins",
-                   "Number of bins:",
-                   min = 1,
-                   max = 50,
-                   value = 30)
-    ),
+    titlePanel("Stocks and Indices Price Fluctuation"),
     
-    # Show a plot of the generated distribution
-    mainPanel(
-       plotOutput("distPlot")
-    )
-  )
+    sidebarLayout(
+        sidebarPanel(
+            helpText("Select a stock to examine. 
+                     Information will be collected from Yahoo finance."),
+            
+            #  A Select Input to choose the stock symbol
+            selectInput("symb", "Choose a symbol:",
+                        list(`Stock` = c("GOOG", "AAPL", "IBM","MSFT"),
+                             `Exchange` = c("SGX", "BSE", "INX","DAX"))
+            ),
+            #Date Range
+            dateRangeInput("dates", 
+                           "Date range",
+                           start = "2018-01-01", 
+                           end = as.character(Sys.Date())),
+            
+            br(),
+            br(),
+            
+          #  checkboxInput("ctype", "Plot as candlesticks", 
+           #               value = FALSE),
+          radioButtons("ctype", "Show as",
+                             c("Line" = "line",
+                             "Candle Sticks" = "candlesticks",
+                               "Match Sticks" = "matchsticks",
+                               "Bars" = "bars"))
+            
+    ),
+    mainPanel(plotOutput("plot"))
 ))
+)

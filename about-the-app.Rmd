@@ -1,0 +1,110 @@
+---
+title: "Shiny App for Stocks"
+author: "William Alexander"
+date: "May 16, 2018"
+output:
+  ioslides_presentation: default
+  slidy_presentation: default
+---
+
+## Shiny app for Stocks
+
+This app retrieves selected stock and indices from Yahoo website.
+
+- You can choose the type of chart from the options provided
+- You can select the date range 
+- You can change the symbols to view their latest price
+
+## ui.R Part 1
+```{r echo=TRUE,eval=FALSE}
+library(shiny)
+library(quantmod)
+
+shinyUI(fluidPage(
+    titlePanel("Stocks and Indices Price Fluctuation"),
+    
+    sidebarLayout(
+        sidebarPanel(
+            helpText("Select a stock to examine. 
+            Information will be collected from Yahoo finance."),
+            
+            #  A Select Input to choose the stock symbol
+            selectInput("symb", "Choose a symbol:",
+                list(`Stock` = c("GOOG", "AAPL", "IBM","MSFT"),
+                    `Exchange` = c("SGX", "BSE", "INX","DAX"))
+            ),
+            #Date Range
+            dateRangeInput("dates", 
+                           "Date range",
+                           start = "2018-01-01", 
+                           end = as.character(Sys.Date())),
+            
+            br(),
+            br(),
+            
+          #  checkboxInput("ctype", "Plot as candlesticks", 
+           #               value = FALSE),
+          radioButtons("ctype", "Show as",
+                             c("Line" = "line",
+                             "Candle Sticks" = "candlesticks",
+                               "Match Sticks" = "matchsticks",
+                               "Bars" = "bars"))
+            
+    ),
+    mainPanel(plotOutput("plot"))
+))
+)
+```
+
+## ui.R Part 2
+```{r echo=TRUE,eval=FALSE}
+
+            #Date Range
+            dateRangeInput("dates", 
+                           "Date range",
+                           start = "2018-01-01", 
+                           end = as.character(Sys.Date())),
+            
+            br(),
+            br(),
+            
+          #  checkboxInput("ctype", "Plot as candlesticks", 
+           #               value = FALSE),
+          radioButtons("ctype", "Show as",
+                             c("Line" = "line",
+                             "Candle Sticks" = "candlesticks",
+                               "Match Sticks" = "matchsticks",
+                               "Bars" = "bars"))
+            
+    ),
+    mainPanel(plotOutput("plot"))
+))
+)
+```
+
+##Server.R
+
+```{r echo = TRUE, eval=FALSE}
+
+# Server logic
+shinyServer(function(input, output) {
+    
+    dataInput <- reactive({
+        getSymbols(input$symb, src = "yahoo", 
+                   from = input$dates[1],
+                   to = input$dates[2],
+                   auto.assign = FALSE)
+    })
+    
+    output$plot <- renderPlot({
+        
+        chartSeries(dataInput(), theme = chartTheme("white"), 
+                    type = input$ctype, TA = NULL)
+    })
+    
+})
+
+
+```
+
+
